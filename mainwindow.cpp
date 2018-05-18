@@ -102,7 +102,7 @@ void MainWindow::imageOpen() {
         tr("Open Image"), "/Users/jyp/Desktop", tr("Image Files (*.png *.jpg *.bmp)"));
     qDebug() << fileName << "hi";
     QImage image = QImage(fileName);
-    scaled = image.scaled(576, 1600, Qt::KeepAspectRatio);
+    scaled = image.scaled(576, 1200, Qt::KeepAspectRatio);
     imageToProcess = scaled.copy();
 
     change(ui->horizontalSlider->value());
@@ -111,14 +111,19 @@ void MainWindow::imageOpen() {
 }
 
 void MainWindow::imageSave() {
-    imageToProcess.convertToFormat(QImage::Format_Mono).save("image.jpg");
+    (imageToProcess.convertToFormat(QImage::Format_Mono)).save("/Users/jyp/Desktop/image.jpg");
 }
 
 void MainWindow::imagePrint() {
-    QByteArray msg = QByteArray("hello").append(QString::number(count++));
-    qDebug() << "print:" << msg;
+    QBuffer buffer(&imageData);        // Construct a QBuffer object using the QbyteArray
+    imageToProcess.save(&buffer, "jpg"); // Save the QImage data into the QBuffer
+    qDebug() << "Size:" << imageData.size();
 
-    mqttThread.setImageData(msg);
+    ui->statusBar->showMessage(QString::fromUtf8(""));
+    if (imageData.size() > 150000 - 1) {
+        imageData.clear();
+        ui->statusBar->showMessage(QString::fromUtf8("아.. 이미지가 조금 커서 프린트를 할 수가... ㅠ.ㅜ"), 10000);
+    }
 }
 
 void MainWindow::refresh() {
